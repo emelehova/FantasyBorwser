@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 trap 'echo "Error on line $LINENO"; exit 1' ERR
+set -x
 
 : "${APP_NAME:?APP_NAME is required}"
 : "${ARCH:?ARCH is required}"
@@ -23,8 +24,10 @@ BIN_PATH="${MACOS_DIR}/${APP_NAME}"
 
 mkdir -p "$MACOS_DIR" "$RES_DIR"
 
+# Info.plist -> Contents
 cp -f Info.plist "${CONTENTS_DIR}/Info.plist"
 
+# Компиляция (AppKit + WebKit)
 swiftc \
   -target "$TARGET" \
   -sdk "$SDK_PATH" \
@@ -34,8 +37,10 @@ swiftc \
   BrowserViewController.swift \
   -o "$BIN_PATH"
 
+# PkgInfo для корректного типа бандла
 printf "APPL????" > "${CONTENTS_DIR}/PkgInfo"
 
+# Ad-hoc подпись
 codesign --force --sign - --timestamp=none "$APP_DIR"
 
 echo "=== OUTPUT TREE (${ARCH}) ==="
