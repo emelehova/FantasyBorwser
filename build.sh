@@ -1,45 +1,42 @@
 #!/usr/bin/env bash
-set -euo pipefail
-set -x
+set -Eeuo pipefail
+trap 'echo "Error on line $LINENO"; exit 1' ERR
 
-APP="${APP_NAME:-FHBrowser}"
-ARCH="${ARCH:-arm64}"
+: "${APP_NAME:?APP_NAME is required}"
+: "${ARCH:?ARCH is required}"
+MACOSX_DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET:-12.0}"
+
+case "$ARCH" in
+  arm64)   TARGET="arm64-apple-macosx${MACOSX_DEPLOYMENT_TARGET}" ;;
+  x86_64)  TARGET="x86_64-apple-macosx${MACOSX_DEPLOYMENT_TARGET}" ;;
+  *) echo "Unknown ARCH=$ARCH"; exit 2 ;;
+esac
+
 SDK_PATH="$(xcrun --sdk macosx --show-sdk-path)"
-SWIFTC="$(xcrun --sdk macosx --find swiftc)"
-DEPLOY="${MACOSX_DEPLOYMENT_TARGET:-12.0}"
 
-OUT_ROOT="dist"
-BIN_ROOT="build"
-OUT_DIR="${OUT_ROOT}/${ARCH}"
-BIN_DIR="${BIN_ROOT}/${ARCH}"
+BUILD_DIR="build/${ARCH}"
+APP_DIR="${BUILD_DIR}/${APP_NAME}.app"
+CONTENTS_DIR="${APP_DIR}/Contents"
+MACOS_DIR="${CONTENTS_DIR}/MacOS"
+RES_DIR="${CONTENTS_DIR}/Resources"
+BIN_PATH="${MACOS_DIR}/${APP_NAME}"
 
-rm -rf "${OUT_DIR}" "${BIN_DIR}"
-mkdir -p "${OUT_DIR}" "${BIN_DIR}"
+mkdir -p "$MACOS_DIR" "$RES_DIR"
 
-if [ "${ARCH}" = "arm64" ]; then
-  TARGET="arm64-apple-macos${DEPLOY}"
-else
-  TARGET="x86_64-apple-macos${DEPLOY}"
-fi
+cp -f Info.plist "${CONTENTS_DIR}/Info.plist"
 
-"${SWIFTC}" --version
-
-"${SWIFTC}" -O \
-  -sdk "${SDK_PATH}" \
-  -target "${TARGET}" \
-  -Xlinker -rpath -Xlinker "@executable_path/../Frameworks" \
-  -framework Cocoa \
+swiftc \
+  -target "$TARGET" \
+  -sdk "$SDK_PATH" \
+  -framework AppKit \
   -framework WebKit \
   AppDelegate.swift \
   BrowserViewController.swift \
-  -o "${BIN_DIR}/${APP}"
+  -o "$BIN_PATH"
 
-mkdir -p "${OUT_DIR}/${APP}.app/Contents/MacOS"
-mkdir -p "${OUT_DIR}/${APP}.app/Contents/Resources"
+printf "APPL????" > "${CONTENTS_DIR}/PkgInfo"
 
-plutil -lint Info.plist
-cp Info.plist "${OUT_DIR}/${APP}.app/Contents/Info.plist"
-cp "${BIN_DIR}/${APP}" "${OUT_DIR}/${APP}.app/Contents/MacOS/${APP}"
-chmod +x "${OUT_DIR}/${APP}.app/Contents/MacOS/${APP}"
+codesign --force --sign - --timestamp=none "$APP_DIR"
 
-echo "Built app: ${OUT_DIR}/${APP}.app"
+echo "=== OUTPUT TREE (${ARCH}) ==="
+find "build/${ARCH}" -maxdepth 4 -print
