@@ -1,0 +1,26 @@
+name: macOS Build
+on: [workflow_dispatch, push]
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install tools
+        run: |
+          sudo xcode-select --install || true
+      - name: Make build scripts executable
+        run: |
+          chmod +x build.sh
+          chmod +x package-dmg.sh
+      - name: Build .app
+        run: |
+          ./build.sh
+      - name: Package DMG
+        run: |
+          ./package-dmg.sh
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: FHBrowser_macOS
+          path: dist/*
