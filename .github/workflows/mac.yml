@@ -1,26 +1,37 @@
 name: macOS Build
-on: [workflow_dispatch, push]
+
+on:
+  push:
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: macos-14
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [arm64, x86_64]
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Install tools
-        run: |
-          sudo xcode-select --install || true
-      - name: Make build scripts executable
+      - uses: actions/checkout@v4
+
+      - name: Make scripts executable
         run: |
           chmod +x build.sh
           chmod +x package-dmg.sh
+
       - name: Build .app
-        run: |
-          ./build.sh
+        env:
+          ARCH: ${{ matrix.arch }}
+        run: ./build.sh
+
       - name: Package DMG
-        run: |
-          ./package-dmg.sh
+        env:
+          ARCH: ${{ matrix.arch }}
+        run: ./package-dmg.sh
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: FHBrowser_macOS
-          path: dist/*
+          name: FHBrowser_${{ matrix.arch }}
+          path: dist/${{ matrix.arch }}/*
