@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 trap 'echo "Error on line $LINENO"; exit 1' ERR
+set -x
 
 : "${APP_NAME:?APP_NAME is required}"
 : "${ARCH:?ARCH is required}"
@@ -10,7 +11,7 @@ OUT_DIR="dist/${ARCH}"
 OUT_DMG="${OUT_DIR}/${APP_NAME}-${ARCH}.dmg"
 VOL_NAME="${APP_NAME}"
 
-test -d "$SRC_APP"
+[ -d "$SRC_APP" ]
 
 mkdir -p "$OUT_DIR"
 
@@ -18,7 +19,7 @@ TMP_DMG="${OUT_DIR}/${APP_NAME}-${ARCH}-rw.dmg"
 SIZE_MB=$(( $(du -sm "$SRC_APP" | awk '{print $1}') + 50 ))
 
 hdiutil create -size "${SIZE_MB}m" -fs HFS+ -volname "$VOL_NAME" "$TMP_DMG"
-DEV="$(hdiutil attach -readwrite "$TMP_DMG" | awk '/Apple_HFS/ {print $1}')"
+DEV="$(hdiutil attach -readwrite "$TMP_DMG" | awk '/Apple_HFS/ {print $1; exit}')"
 MNT="$(mount | awk -v dev="$DEV" '$1==dev {print $3; exit}')"
 
 cp -R "$SRC_APP" "$MNT/"
