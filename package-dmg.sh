@@ -1,17 +1,32 @@
 #!/usr/bin/env bash
-set -euo pipefail
-set -x
+set -Eeuo pipefail
+trap 'echo "Error on line $LINENO"; exit 1' ERR
 
-APP="${APP_NAME:-FHBrowser}"
-ARCH="${ARCH:-arm64}"
+: "${APP_NAME:?APP_NAME is required}"
+: "${ARCH:?ARCH is required}"
+
+SRC_APP="build/${ARCH}/${APP_NAME}.app"
 OUT_DIR="dist/${ARCH}"
-DMG="${OUT_DIR}/${APP}-${ARCH}.dmg"
+OUT_DMG="${OUT_DIR}/${APP_NAME}-${ARCH}.dmg"
+VOL_NAME="${APP_NAME}"
 
-test -d "${OUT_DIR}/${APP}.app"
+test -d "$SRC_APP"
 
-hdiutil create \
-  -volname "${APP}-${ARCH}" \
-  -srcfolder "${OUT_DIR}/${APP}.app" \
-  -ov -format UDZO "${DMG}"
+mkdir -p "$OUT_DIR"
 
-echo "DMG ready: ${DMG}"
+TMP_DMG="${OUT_DIR}/${APP_NAME}-${ARCH}-rw.dmg"
+SIZE_MB=$(( $(du -sm "$SRC_APP" | awk '{print $1}') + 50 ))
+
+hdiutil create -size "${SIZE_MB}m" -fs HFS+ -volname "$VOL_NAME" "$TMP_DMG"
+DEV="$(hdiutil attach -readwrite "$TMP_DMG" | awk '/Apple_HFS/ {print $1}')"
+MNT="$(mount | awk -v dev="$DEV" '$1==dev {print $3; exit}')"
+
+cp -R "$SRC_APP" "$MNT/"
+
+sync
+
+hdiutil detach "$DEV"
+hdiutil convert "$TMP_DMG" -format UDZO -imagekey zlib-level=9 -o "$OUT_DMG"
+rm -f "$TMP_DMG"
+
+echo "DMG: $OUT_DMG"
