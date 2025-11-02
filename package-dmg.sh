@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
+set -x
 
-APP=FHBrowser
+APP="${APP_NAME:-FHBrowser}"
 ARCH="${ARCH:-arm64}"
 OUT_DIR="dist/${ARCH}"
 DMG="${OUT_DIR}/${APP}-${ARCH}.dmg"
@@ -12,3 +13,5 @@ hdiutil create \
   -volname "${APP}-${ARCH}" \
   -srcfolder "${OUT_DIR}/${APP}.app" \
   -ov -format UDZO "${DMG}"
+
+echo "DMG ready: ${DMG}"
