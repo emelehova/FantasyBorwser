@@ -1,4 +1,4 @@
-import Cocoa
+import AppKit
 import WebKit
 
 @main
@@ -7,31 +7,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var controller: BrowserViewController!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        let screen = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1200, height: 800)
-        let width: CGFloat = 1200
-        let height: CGFloat = 800
-        let rect = NSRect(
-            x: screen.midX - width/2,
-            y: screen.midY - height/2,
-            width: width,
-            height: height
-        )
-
-        window = NSWindow(
-            contentRect: rect,
-            styleMask: [.titled, .closable, .miniaturizable, .resizable],
-            backing: .buffered,
-            defer: false
-        )
-        window.title = "FH Browser"
-        window.isReleasedWhenClosed = false
-
+        let rect = NSRect(x: 0, y: 0, width: 1200, height: 800)
+        window = NSWindow(contentRect: rect, styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
+        window.title = "FantasyBorwser"
         controller = BrowserViewController()
         window.contentViewController = controller
+        window.center()
         window.makeKeyAndOrderFront(nil)
-
-        NSApp.setActivationPolicy(.regular)
-        NSApp.activate(ignoringOtherApps: true)
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
