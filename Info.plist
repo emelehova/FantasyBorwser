@@ -1,39 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
- "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-  <key>CFBundleIdentifier</key>
-  <string>ru.fantasyhub.browser</string>
-  <key>CFBundleName</key>
-  <string>FHBrowser</string>
-  <key>CFBundleDisplayName</key>
-  <string>FHBrowser</string>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>en</string>
   <key>CFBundleExecutable</key>
-  <string>FHBrowser</string>
+  <string>FantasyBorwser</string>
+  <key>CFBundleIdentifier</key>
+  <string>com.example.FantasyBorwser</string>
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+  <key>CFBundleName</key>
+  <string>FantasyBorwser</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
-  <key>CFBundleVersion</key>
-  <string>1.0.0</string>
   <key>CFBundleShortVersionString</key>
   <string>1.0.0</string>
+  <key>CFBundleVersion</key>
+  <string>1</string>
   <key>LSMinimumSystemVersion</key>
   <string>12.0</string>
-  <key>LSApplicationCategoryType</key>
-  <string>public.app-category.productivity</string>
-
-  <key>NSPrincipalClass</key>
-  <string>NSApplication</string>
   <key>NSHighResolutionCapable</key>
   <true/>
-
+  <key>NSPrincipalClass</key>
+  <string>NSApplication</string>
   <key>NSAppTransportSecurity</key>
   <dict>
     <key>NSAllowsArbitraryLoads</key>
     <true/>
   </dict>
-
-  <key>LSBackgroundOnly</key>
-  <false/>
 </dict>
 </plist>
