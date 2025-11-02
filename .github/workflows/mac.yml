@@ -13,12 +13,31 @@ jobs:
         arch: [arm64, x86_64]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Make scripts executable
+      # Диагностика окружения
+      - name: Env diag
         run: |
+          uname -a
+          xcodebuild -version || true
+          xcrun --sdk macosx --show-sdk-path || true
+          swift --version || true
+          ls -la
+          printf "\n--- repo tree ---\n"
+          find . -maxdepth 2 -type f -print
+
+      # Нормализация окончаний строк и права на исполнение
+      - name: Normalize line endings + chmod
+        run: |
+          sed -i $'s/\r$//' build.sh
+          sed -i $'s/\r$//' package-dmg.sh
           chmod +x build.sh
           chmod +x package-dmg.sh
+          # На всякий случай убедимся, что Swift-файлы на месте
+          test -f AppDelegate.swift
+          test -f BrowserViewController.swift
+          test -f Info.plist
 
       - name: Build .app
         env:
