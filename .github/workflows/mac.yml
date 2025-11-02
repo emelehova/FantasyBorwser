@@ -19,7 +19,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Ensure LF endings
+      - name: Normalize line endings for shell scripts
         run: |
           git config --global core.autocrlf false
           find . -type f -name "*.sh" -print0 | xargs -0 -I{} bash -c 'LC_ALL=C sed -i "" "s/\r$//" "{}"'
@@ -30,6 +30,7 @@ jobs:
           chmod +x package-dmg.sh
 
       - name: Build (${{ matrix.arch }})
+        shell: bash
         run: ./build.sh
         env:
           APP_NAME: ${{ env.APP_NAME }}
@@ -37,6 +38,7 @@ jobs:
           MACOSX_DEPLOYMENT_TARGET: ${{ env.MACOSX_DEPLOYMENT_TARGET }}
 
       - name: Package DMG (${{ matrix.arch }})
+        shell: bash
         run: ./package-dmg.sh
         env:
           APP_NAME: ${{ env.APP_NAME }}
