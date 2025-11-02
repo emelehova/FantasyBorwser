@@ -12,13 +12,28 @@ jobs:
       matrix:
         arch: [arm64, x86_64]
 
+    env:
+      APP_NAME: FHBrowser
+      MACOSX_DEPLOYMENT_TARGET: "12.0"
+
     steps:
       - uses: actions/checkout@v4
+
+      - name: Ensure LF line endings
+        run: |
+          brew install dos2unix || true
+          dos2unix build.sh package-dmg.sh AppDelegate.swift BrowserViewController.swift Info.plist || true
 
       - name: Make scripts executable
         run: |
           chmod +x build.sh
           chmod +x package-dmg.sh
+
+      - name: Print toolchain info
+        run: |
+          xcodebuild -version
+          xcrun --sdk macosx --show-sdk-path
+          xcrun --sdk macosx swiftc --version
 
       - name: Build .app
         env:
@@ -33,5 +48,5 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: FHBrowser_${{ matrix.arch }}
+          name: ${{ env.APP_NAME }}_${{ matrix.arch }}
           path: dist/${{ matrix.arch }}/*
